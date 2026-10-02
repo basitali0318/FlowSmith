@@ -1,27 +1,13 @@
 import 'reflect-metadata';
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { Logger } from '@nestjs/common';
 import * as express from 'express';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { AppModule } from './app.module';
+import { createApp } from './app.factory';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bodyParser: false });
+  const app = await createApp();
   const log = new Logger('Bootstrap');
-
-  app.set('trust proxy', 1); // correct client IPs for rate limiting behind Render / Railway / nginx
-  app.use(express.json({ limit: '3mb' }));
-  app.use((_req: express.Request, res: express.Response, next: express.NextFunction) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-    res.setHeader('Referrer-Policy', 'no-referrer');
-    next();
-  });
-  if (process.env.CORS_ORIGIN) app.enableCors({ origin: process.env.CORS_ORIGIN.split(','), credentials: false });
-  app.setGlobalPrefix('api');
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   // Serve the built React app (single deployable unit).
   const candidates = [process.env.FRONTEND_DIST, join(__dirname, '../public'), join(__dirname, '../../frontend/dist')]

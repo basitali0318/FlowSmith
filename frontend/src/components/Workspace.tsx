@@ -104,7 +104,14 @@ export default function Workspace({ user, health, onLogout }: { user: string; he
     setRec({ id: '', title: 'Generating…', status: 'queued', trace: [], createdAt: '', engineChoice: engine });
     try {
       const r = await api.create(text, engine, file);
-      track(r.id);
+      if (r.record) {
+        // finished inside the request (serverless hosting) - no polling needed
+        setRec(r.record);
+        if (r.record.status === 'failed') setError(r.record.error || 'Generation failed.');
+        else adopt(r.record);
+        setBusy(false);
+        refreshHistory();
+      } else track(r.id);
     } catch (e: any) {
       setBusy(false); setRec(null); setError(e.message);
       if (e instanceof ApiError && e.status === 401) onLogout();
@@ -144,7 +151,7 @@ export default function Workspace({ user, health, onLogout }: { user: string; he
   }
 
   function onFile(f: File | null) {
-    if (f && f.size > 5 * 1024 * 1024) { setError('File is larger than 5 MB.'); return; }
+    if (f && f.size > 4 * 1024 * 1024) { setError('File is larger than 4 MB.'); return; }
     setFile(f);
     if (f) setError('');
   }

@@ -27,6 +27,11 @@ export class ProcessesService {
       status: 'queued',
       trace: [],
     });
+    // Serverless (Vercel) freezes the function once the response is sent, so run the job inside the request.
+    if (process.env.VERCEL) {
+      await this.run(rec);
+      return (await this.store.getProcess(rec.id, userId)) ?? rec;
+    }
     this.queue.enqueue(() => this.run(rec));
     return rec;
   }

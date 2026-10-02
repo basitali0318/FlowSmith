@@ -41,7 +41,7 @@ export const api = {
     if (description) f.set('description', description);
     f.set('engine', engine);
     if (file) f.set('file', file);
-    return request<{ id: string; status: string }>('/processes', { method: 'POST', body: f });
+    return request<{ id: string; status: string; record?: ProcessRec }>('/processes', { method: 'POST', body: f });
   },
   saveXml: (id: string, xml: string) => request<{ valid: boolean; issues: import('./types').Issue[] }>(`/processes/${id}/xml`, { method: 'PUT', body: JSON.stringify({ xml }) }),
 };
