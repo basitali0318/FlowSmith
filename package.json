@@ -1,0 +1,15 @@
+{
+  "name": "flowsmith",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FlowSmith AI - turn plain-language process descriptions into validated BPMN 2.0 diagrams",
+  "workspaces": ["backend", "frontend"],
+  "scripts": {
+    "build": "npm run build -w frontend && npm run build -w backend",
+    "start": "node backend/dist/main.js",
+    "dev:backend": "npm run dev -w backend",
+    "dev:frontend": "npm run dev -w frontend",
+    "test": "npm test -w backend"
+  },
+  "engines": { "node": ">=20" }
+}

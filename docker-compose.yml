@@ -1,0 +1,22 @@
+# docker compose up --build              -> app + PostgreSQL (LLM via Groq if GROQ_API_KEY is set, else rules engine)
+# docker compose --profile local-llm up  -> also starts Ollama (pull a model once: docker compose exec ollama ollama pull qwen2.5:7b-instruct)
+services:
+  app:
+    build: .
+    ports: ["3000:3000"]
+    env_file: [{ path: .env, required: false }]
+    environment:
+      DATABASE_URL: postgres://flowsmith:flowsmith@db:5432/flowsmith
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+    depends_on:
+      db: { condition: service_healthy }
+  db:
+    image: pgvector/pgvector:pg16   # pgvector-ready for SOP embeddings (roadmap)
+    environment: { POSTGRES_USER: flowsmith, POSTGRES_PASSWORD: flowsmith, POSTGRES_DB: flowsmith }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U flowsmith"], interval: 5s, retries: 10 }
+  ollama:
+    image: ollama/ollama
+    profiles: [local-llm]
+    volumes: [ollama:/root/.ollama]
+volumes: { pgdata: {}, ollama: {} }

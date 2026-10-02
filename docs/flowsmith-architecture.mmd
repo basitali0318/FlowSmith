@@ -1,0 +1,78 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#ffffff",
+    "primaryColor": "#ffffff",
+    "primaryTextColor": "#111827",
+    "primaryBorderColor": "#1f2937",
+    "secondaryColor": "#ffffff",
+    "tertiaryColor": "#ffffff",
+    "lineColor": "#374151",
+    "clusterBkg": "#ffffff",
+    "clusterBorder": "#9ca3af",
+    "edgeLabelBackground": "#ffffff",
+    "fontFamily": "Arial, Helvetica, sans-serif"
+  }
+}}%%
+flowchart LR
+    subgraph Client["React Web App"]
+        UI["Chat and Document Upload UI"]
+        VIEW["bpmn-js Viewer and Editor"]
+    end
+
+    subgraph API["NestJS Backend"]
+        AUTH["JWT Auth and Rate Limiting"]
+        ORCH["Orchestrator Service"]
+        QUEUE["Job Queue (BullMQ)"]
+    end
+
+    subgraph AGENTS["LangGraph Agent Pipeline"]
+        EXT["1. Process Extractor<br/>actors, tasks, gateways, handoffs"]
+        GEN["2. BPMN XML Generator"]
+        VAL["3. Validator<br/>bpmn-moddle schema and rule checks"]
+        REP["Repair Loop<br/>max 3 retries"]
+        ANA["4. Bottleneck Analyzer<br/>redundant steps, missing exception paths"]
+        ADV["5. Improvement Advisor"]
+    end
+
+    subgraph LLM["Open-Source Model Layer"]
+        MODEL["Qwen2.5 / Llama 3.1<br/>served via Ollama or vLLM"]
+        EMB["nomic-embed-text"]
+    end
+
+    subgraph DATA["Storage"]
+        PG[("PostgreSQL + Prisma")]
+        VEC[("pgvector<br/>SOP embeddings")]
+        FILES[("Object Storage<br/>uploaded SOPs, exports")]
+    end
+
+    UI -->|"description or SOP file"| AUTH
+    AUTH --> ORCH
+    ORCH --> QUEUE
+    QUEUE --> EXT
+    EXT --> GEN
+    GEN --> VAL
+    VAL -->|"invalid"| REP
+    REP --> GEN
+    VAL -->|"valid"| ANA
+    ANA --> ADV
+    ADV -->|"BPMN XML, findings, suggestions"| ORCH
+    ORCH -->|"render result"| VIEW
+
+    EXT --- MODEL
+    GEN --- MODEL
+    ANA --- MODEL
+    ADV --- MODEL
+    EXT -->|"retrieve context"| VEC
+    EMB --> VEC
+    ORCH --> PG
+    ORCH --> FILES
+    VIEW -->|"manual edits and export BPMN, PNG, PDF"| ORCH
+
+    classDef box fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    class UI,VIEW,AUTH,ORCH,QUEUE,EXT,GEN,VAL,REP,ANA,ADV,MODEL,EMB,PG,VEC,FILES box
+    style Client fill:#ffffff,stroke:#9ca3af,color:#111827
+    style API fill:#ffffff,stroke:#9ca3af,color:#111827
+    style AGENTS fill:#ffffff,stroke:#9ca3af,color:#111827
+    style LLM fill:#ffffff,stroke:#9ca3af,color:#111827
+    style DATA fill:#ffffff,stroke:#9ca3af,color:#111827
