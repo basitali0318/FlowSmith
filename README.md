@@ -34,7 +34,7 @@ React (Chat/Upload + bpmn-js) -> NestJS (JWT + rate limit -> Orchestrator -> Que
 The LangGraph state machine lives in [`backend/src/pipeline/graph.ts`](backend/src/pipeline/graph.ts).
 
 ### Two engines, one pipeline
-- **LLM engine** - open-source models (Llama 3.3 70B on Groq by default; Qwen2.5 / Llama 3.1 via Ollama or vLLM) return a structured process graph (JSON-schema constrained on Ollama, JSON mode on Groq/vLLM). The same graph feeds the deterministic BPMN generator, so XML is always well-formed.
+- **LLM engine** - open-weight models (on Groq the model is auto-selected from the key's live model list - verified live with `openai/gpt-oss-120b` after Groq retired Llama 3.3 for that key; Qwen2.5 / Llama 3.1 via self-hosted Ollama or vLLM) return a structured process graph (JSON-schema constrained on Ollama, JSON mode on Groq/vLLM). The same graph feeds the deterministic BPMN generator, so XML is always well-formed.
 - **Rules engine** - a deterministic NLP extractor. It is the automatic fallback when no model server is reachable or the LLM call fails, so **the product always returns a diagram** (and the hosted demo works even without a GPU or API key).
 
 `Engine: Auto` (default) uses the LLM when reachable and falls back to rules, and the UI shows which engine produced each diagram.
@@ -103,3 +103,8 @@ GROQ_API_KEY=... npx @basitali0318/flowsmith      # serves the app on http://loc
 
 Publishing is automated by [`.github/workflows/publish.yml`](.github/workflows/publish.yml) (Actions tab -> *Publish package* -> Run workflow, or publish a GitHub Release).
 Real-API verification of the Groq engine: add repo secret `GROQ_API_KEY`, then run *Groq live check* (or locally `npm run test:live -w backend`).
+
+## Live deployment check
+
+`node scripts/smoke.mjs https://<your-deployment>` (or the *Live smoke test* workflow) logs in and generates every sample with `engine=llm`.
+It fails unless the real LLM produced the result, and prints the model that was used. Last verified run: all 3 samples PASS on Vercel with Groq (`openai/gpt-oss-120b`), 3.5-5.5 s each, 0 repairs needed.
