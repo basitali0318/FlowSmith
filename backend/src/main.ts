@@ -24,7 +24,10 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   // Serve the built React app (single deployable unit).
-  const dist = resolve(process.env.FRONTEND_DIST || join(__dirname, '../../frontend/dist'));
+  const candidates = [process.env.FRONTEND_DIST, join(__dirname, '../public'), join(__dirname, '../../frontend/dist')]
+    .filter((p): p is string => !!p)
+    .map((p) => resolve(p));
+  const dist = candidates.find((p) => existsSync(join(p, 'index.html'))) ?? candidates[0];
   if (existsSync(join(dist, 'index.html'))) {
     app.use(express.static(dist, { index: false, maxAge: '1h' }));
     app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {

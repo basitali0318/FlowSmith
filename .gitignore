@@ -4,3 +4,8 @@ dist
 *.log
 .DS_Store
 coverage
+
+backend/public
+backend/README.md
+backend/LICENSE
+*.tgz

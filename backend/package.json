@@ -1,13 +1,51 @@
 {
-  "name": "@flowsmith/backend",
+  "name": "@basitali0318/flowsmith",
   "version": "0.1.0",
-  "private": true,
+  "description": "FlowSmith AI - turn plain-language process descriptions, SOPs and meeting notes into validated BPMN 2.0 diagrams (NestJS + LangGraph + bpmn-js, Groq/Ollama/vLLM).",
+  "license": "MIT",
+  "keywords": [
+    "bpmn",
+    "process-mining",
+    "llm",
+    "langgraph",
+    "nestjs",
+    "sop",
+    "groq"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/basitali0318/FlowSmith.git",
+    "directory": "backend"
+  },
+  "homepage": "https://github.com/basitali0318/FlowSmith#readme",
+  "bugs": {
+    "url": "https://github.com/basitali0318/FlowSmith/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "restricted"
+  },
   "main": "dist/main.js",
+  "bin": {
+    "flowsmith": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "!dist/test",
+    "public",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput & node --watch --env-file-if-exists=../.env dist/main.js",
     "start": "node dist/main.js",
-    "test": "tsc -p tsconfig.json && node --test \"dist/test/*.test.js\""
+    "test": "tsc -p tsconfig.json && node --test \"dist/test/*.test.js\"",
+    "prepack": "node scripts/prepack.cjs",
+    "test:live": "tsc -p tsconfig.json && node dist/test/live-groq.js"
   },
   "dependencies": {
     "@langchain/langgraph": "^1.4.0",

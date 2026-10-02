@@ -1,0 +1,18 @@
+# Real (non-mocked) end-to-end check of the Groq LLM engine.
+# Requires the repository secret GROQ_API_KEY (Settings > Secrets and variables > Actions).
+name: Groq live check
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - run: npm run test:live -w backend
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
