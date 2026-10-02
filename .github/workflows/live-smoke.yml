@@ -1,0 +1,17 @@
+# Calls a DEPLOYED FlowSmith end to end (health -> login -> generate every sample with the LLM engine).
+# The Groq key lives in the hosting platform's env (e.g. Vercel); nothing secret is needed here.
+name: Live smoke test
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Base URL of the deployed app
+        default: https://flowsmith-ai.vercel.app
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node scripts/smoke.mjs "${{ inputs.url || 'https://flowsmith-ai.vercel.app' }}"
