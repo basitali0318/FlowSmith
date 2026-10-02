@@ -1,7 +1,7 @@
 import http from 'node:http';
 
 /** Minimal OpenAI-compatible (Groq-shaped) server used by tests; no real model involved. */
-export function startMockLlm(): Promise<{ url: string; calls: any[]; close: () => Promise<void> }> {
+export function startMockLlm(models: string[] = ['mock']): Promise<{ url: string; calls: any[]; close: () => Promise<void> }> {
   const calls: any[] = [];
   const broken = {
     title: 'Order Fulfilment',
@@ -27,7 +27,7 @@ export function startMockLlm(): Promise<{ url: string; calls: any[]; close: () =
       const json = body ? JSON.parse(body) : {};
       calls.push({ url: req.url, auth: req.headers.authorization, body: json });
       res.setHeader('content-type', 'application/json');
-      if (req.url === '/v1/models') return res.end(JSON.stringify({ data: [{ id: 'mock' }] }));
+      if (req.url === '/v1/models') return res.end(JSON.stringify({ data: models.map((id) => ({ id })) }));
       const sys: string = json.messages?.[0]?.content ?? '';
       const content = /repairing/.test(sys)
         ? JSON.stringify({ ...broken, nodes: [{ id: 's', type: 'start', name: 'Start' }, ...broken.nodes, { id: 'z', type: 'end', name: 'Done' }], flows: [{ from: 's', to: 'a' }, ...broken.flows.map((f) => (f.from === 'c' ? { ...f, label: f.to === 'd' ? 'Yes' : 'No' } : f)), { from: 'd', to: 'z' }, { from: 'e', to: 'z' }] })
