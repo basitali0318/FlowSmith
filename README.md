@@ -87,3 +87,19 @@ Secrets are read from environment variables only; nothing sensitive is committed
 | Rules engine | English only; best on SOP-style sentences ("The manager approves...", "If ..., ... Otherwise, ...") |
 
 Tech: NestJS 11 · LangGraph.js · bpmn-moddle · bpmn-js · React 18 + Vite · PostgreSQL · Groq / Ollama / vLLM.
+
+## Install from GitHub Packages (npm)
+
+The backend + bundled web app is published as `@basitali0318/flowsmith` on the GitHub npm registry
+([docs](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry)).
+
+```bash
+# one-time: authenticate (token needs read:packages) and map the scope
+echo "@basitali0318:registry=https://npm.pkg.github.com" >> ~/.npmrc
+echo "//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN" >> ~/.npmrc
+
+GROQ_API_KEY=... npx @basitali0318/flowsmith      # serves the app on http://localhost:3000
+```
+
+Publishing is automated by [`.github/workflows/publish.yml`](.github/workflows/publish.yml) (Actions tab -> *Publish package* -> Run workflow, or publish a GitHub Release).
+Real-API verification of the Groq engine: add repo secret `GROQ_API_KEY`, then run *Groq live check* (or locally `npm run test:live -w backend`).
